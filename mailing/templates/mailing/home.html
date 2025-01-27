@@ -4,9 +4,24 @@
 
 {% block content %}
 <h1>Добро пожаловать в Mailing App</h1>
-<p>
-    <a href="{% url 'mailing:recipient_list' %}" class="btn btn-primary">Перейти к получателям</a>
-    <a href="{% url 'mailing:message_list' %}" class="btn btn-primary">Перейти к сообщениям</a>
-    <a href="{% url 'mailing:mailing_list' %}" class="btn btn-primary">Перейти к рассылкам</a>
-</p>
+<div class="row">
+    <div class="container">
+        <table class="table">
+            <thead>
+            <tr>
+                <th scope="col">Всего рассылок</th>
+                <th scope="col">Активных рассылок</th>
+                <th scope="col">Уникальных получателей</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+                <td>{{ total_mailings }}</td>
+                <td>{{ active_mailings }}</td>
+                <td>{{ unique_recipients }}</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
 {% endblock %}

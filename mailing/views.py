@@ -94,13 +94,6 @@ class MailingDeleteView(generic.DeleteView):
 class MailingStatusView(generic.DetailView):
     model = Mailing
     template_name = 'mailing/mailing_status.html'
-    # context_object_name = 'mailing'
-
-    # def get_context_data(self, **kwargs):
-    #     context = super().get_context_data(**kwargs)
-    #     context['mailing'] = Mailing.objects.filter(mailing_id=self.kwargs['pk'])
-    #     # context['recipients'] = Mailing.objects.filter(mailing_id=self.kwargs['pk']).recipients.values('email')
-    #     return context
 
 
 # Генерация отчета и отправка рассылки
