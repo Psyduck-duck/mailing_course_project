@@ -56,6 +56,7 @@ class SendAttempt(models.Model):
     attempt_time = models.DateTimeField(auto_now_add=True, verbose_name='Время попытки')
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, verbose_name='Статус попытки')
     server_response = models.TextField(blank=True, verbose_name='Ответ сервера')
+    recipient = models.ForeignKey(Recipient, on_delete=models.CASCADE, related_name='send_attempts', verbose_name='Получатель')
     mailing = models.ForeignKey(Mailing, on_delete=models.CASCADE, related_name='send_attempts', verbose_name='Рассылка')
 
     def __str__(self):

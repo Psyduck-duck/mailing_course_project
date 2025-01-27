@@ -91,10 +91,22 @@ class MailingDeleteView(generic.DeleteView):
     success_url = reverse_lazy('mailing:mailing_list')
 
 
+class MailingStatusView(generic.DetailView):
+    model = Mailing
+    template_name = 'mailing/mailing_status.html'
+    # context_object_name = 'mailing'
+
+    # def get_context_data(self, **kwargs):
+    #     context = super().get_context_data(**kwargs)
+    #     context['mailing'] = Mailing.objects.filter(mailing_id=self.kwargs['pk'])
+    #     # context['recipients'] = Mailing.objects.filter(mailing_id=self.kwargs['pk']).recipients.values('email')
+    #     return context
+
+
 # Генерация отчета и отправка рассылки
 
 class SendMailingView(generic.View):
-    def post(self, request, mailing_id):
+    def get(self, request, mailing_id):
         mailing = self.get_object(mailing_id)
         recipients = mailing.recipients.all()
 
@@ -118,6 +130,7 @@ class SendMailingView(generic.View):
             SendAttempt.objects.create(
                 mailing=mailing,
                 status=status,
+                recipient=recipient,
                 server_response=server_response
             )
 
@@ -127,7 +140,7 @@ class SendMailingView(generic.View):
             mailing.first_sent_at = timezone.now()
             mailing.save()
 
-        return render(request, 'mailing_status.html', {'mailing': mailing})
+        return render(request, 'mailing/mailing_status.html', {'mailing': mailing})
 
     def get_object(self, mailing_id):
         return Mailing.objects.get(id=mailing_id)

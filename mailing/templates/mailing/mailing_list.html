@@ -21,6 +21,7 @@
             <td>
                 <a href="{% url 'mailing:mailing_update' mailing.pk %}" class="btn btn-warning">Редактировать</a>
                 <a href="{% url 'mailing:send_mailing' mailing.pk %}" class="btn btn-info">Отправить</a>
+                <a href="{% url 'mailing:mailing_status' mailing.pk %}" class="btn btn-info">Подробнее</a>
                 <a href="{% url 'mailing:mailing_delete' mailing.pk %}" class="btn btn-danger">Удалить</a>
             </td>
         </tr>

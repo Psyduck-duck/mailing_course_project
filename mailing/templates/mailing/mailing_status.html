@@ -11,6 +11,7 @@
 <table class="table table-striped">
     <thead>
         <tr>
+            <th>Получатель</th>
             <th>Время</th>
             <th>Статус</th>
             <th>Ответ сервера</th>
@@ -19,6 +20,7 @@
     <tbody>
         {% for attempt in mailing.send_attempts.all %}
         <tr>
+            <td>{{ attempt.recipient }}</td>
             <td>{{ attempt.attempt_time|date:"D d M Y H:i:s" }}</td>
             <td>{{ attempt.status }}</td>
             <td>{{ attempt.server_response }}</td>
@@ -26,5 +28,5 @@
         {% endfor %}
     </tbody>
 </table>
-<a href="{% url 'mailing_list' %}" class="btn btn-secondary">Назад</a>
+<a href="{% url 'mailing:mailing_list' %}" class="btn btn-secondary">Назад</a>
 {% endblock %}
