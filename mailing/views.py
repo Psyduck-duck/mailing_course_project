@@ -135,7 +135,8 @@ class SendMailingView(generic.View):
 
         return render(request, 'mailing/mailing_status.html', {'mailing': mailing})
 
-    def get_object(self, mailing_id):
+    @staticmethod
+    def get_object(mailing_id):
         return Mailing.objects.get(id=mailing_id)
 
 
