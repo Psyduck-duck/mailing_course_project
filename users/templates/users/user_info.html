@@ -1,0 +1,26 @@
+{% extends 'mailing/base.html' %}
+
+{% block title %}Информация о пользователе{% endblock %}
+
+{% block content %}
+
+<div class="container">
+    <div class="row">
+        <h2>Информация о тебе <3</h2>
+        <div class="col-lg-3 col-md-6 col-sm-12">
+            {% if user.avatar %}
+            <img src="{{user.avatar.url}}" class="img-fluid mt-5" alt="image"/>
+            {% endif %}
+        </div>
+        <div class="col-lg-9 col-md-6 col-sm-12">
+            <ul class="list-group mt-5">
+                <li class="list-group-item">email: {{ user.email }}</li>
+                <li class="list-group-item">Никнейм: {{ user.description }}</li>
+                <li class="list-group-item">Номер телефона: {{ user.phone_number }}</li>
+                <li class="list-group-item">Страна: {{ user.country }}</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

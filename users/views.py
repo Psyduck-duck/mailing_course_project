@@ -2,6 +2,9 @@ from django.contrib.auth import login
 from django.contrib.auth.views import LoginView, LogoutView
 from django.core.mail import send_mail
 from django.urls import reverse_lazy
+from django.views.generic import DetailView
+from .models import CustomUser
+
 from .forms import CustomUserCreationForm
 from django.views.generic.edit import CreateView
 from dotenv import load_dotenv
@@ -34,3 +37,9 @@ class RegisterView(CreateView):
         from_email = os.getenv('EMAIL_HOST_USER')
         recipient_list = [user_email]
         send_mail(subject, message, from_email, recipient_list)
+
+
+class UserDetailView(DetailView):
+    model = CustomUser
+    template_name = 'users/user_info.html'
+    context_object_name = 'user'
