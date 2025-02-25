@@ -1,3 +1,4 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render
 from django.views import generic
 from django.urls import reverse_lazy
@@ -9,91 +10,104 @@ from .forms import RecipientForm, MessageForm, MailingForm
 
 # CRUD для получателей (Recipient)
 
-class RecipientListView(generic.ListView):
+class RecipientListView(LoginRequiredMixin, generic.ListView):
     model = Recipient
     template_name = 'mailing/recipient_list.html'
     context_object_name = 'recipients'
+    login_url = reverse_lazy('users:login')
 
 
-class RecipientCreateView(generic.CreateView):
+class RecipientCreateView(LoginRequiredMixin, generic.CreateView):
     model = Recipient
     form_class = RecipientForm
     template_name = 'mailing/recipient_form.html'
     success_url = reverse_lazy('mailing:recipient_list')
+    login_url = reverse_lazy('users:login')
 
 
-class RecipientUpdateView(generic.UpdateView):
+class RecipientUpdateView(LoginRequiredMixin, generic.UpdateView):
     model = Recipient
     form_class = RecipientForm
     template_name = 'mailing/recipient_form.html'
     success_url = reverse_lazy('mailing:recipient_list')
+    login_url = reverse_lazy('users:login')
 
 
-class RecipientDeleteView(generic.DeleteView):
+class RecipientDeleteView(LoginRequiredMixin, generic.DeleteView):
     model = Recipient
     template_name = 'mailing/recipient_confirm_delete.html'
     success_url = reverse_lazy('mailing:recipient_list')
+    login_url = reverse_lazy('users:login')
 
 
 # CRUD для сообщений (Message)
 
-class MessageListView(generic.ListView):
+class MessageListView(LoginRequiredMixin, generic.ListView):
     model = Message
     template_name = 'mailing/message_list.html'
     context_object_name = 'messages'
+    login_url = reverse_lazy('users:login')
 
 
-class MessageCreateView(generic.CreateView):
+class MessageCreateView(LoginRequiredMixin, generic.CreateView):
     model = Message
     form_class = MessageForm
     template_name = 'mailing/message_form.html'
     success_url = reverse_lazy('mailing:message_list')
+    login_url = reverse_lazy('users:login')
 
 
-class MessageUpdateView(generic.UpdateView):
+class MessageUpdateView(LoginRequiredMixin, generic.UpdateView):
     model = Message
     form_class = MessageForm
     template_name = 'mailing/message_form.html'
     success_url = reverse_lazy('mailing:message_list')
+    login_url = reverse_lazy('users:login')
 
 
-class MessageDeleteView(generic.DeleteView):
+class MessageDeleteView(LoginRequiredMixin, generic.DeleteView):
     model = Message
     template_name = 'mailing/message_confirm_delete.html'
     success_url = reverse_lazy('mailing:message_list')
+    login_url = reverse_lazy('users:login')
 
 
 # CRUD для рассылок (Mailing)
 
-class MailingListView(generic.ListView):
+class MailingListView(LoginRequiredMixin, generic.ListView):
     model = Mailing
     template_name = 'mailing/mailing_list.html'
     context_object_name = 'mailings'
+    login_url = reverse_lazy('users:login')
 
 
-class MailingCreateView(generic.CreateView):
+class MailingCreateView(LoginRequiredMixin, generic.CreateView):
     model = Mailing
     form_class = MailingForm
     template_name = 'mailing/mailing_form.html'
     success_url = reverse_lazy('mailing:mailing_list')
+    login_url = reverse_lazy('users:login')
 
 
-class MailingUpdateView(generic.UpdateView):
+class MailingUpdateView(LoginRequiredMixin, generic.UpdateView):
     model = Mailing
     form_class = MailingForm
     template_name = 'mailing/mailing_form.html'
     success_url = reverse_lazy('mailing:mailing_list')
+    login_url = reverse_lazy('users:login')
 
 
-class MailingDeleteView(generic.DeleteView):
+class MailingDeleteView(LoginRequiredMixin, generic.DeleteView):
     model = Mailing
     template_name = 'mailing/mailing_confirm_delete.html'
     success_url = reverse_lazy('mailing:mailing_list')
+    login_url = reverse_lazy('users:login')
 
 
-class MailingStatusView(generic.DetailView):
+class MailingStatusView(LoginRequiredMixin, generic.DetailView):
     model = Mailing
     template_name = 'mailing/mailing_status.html'
+    login_url = reverse_lazy('users:login')
 
 
 # Генерация отчета и отправка рассылки

@@ -1,6 +1,8 @@
 from django.contrib.auth import login
 from django.contrib.auth.views import LoginView, LogoutView
 from django.core.mail import send_mail
+from django.http import HttpResponseForbidden
+from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import DetailView
 from .models import CustomUser
@@ -43,3 +45,10 @@ class UserDetailView(DetailView):
     model = CustomUser
     template_name = 'users/user_info.html'
     context_object_name = 'user'
+
+    def get(self, request, pk):
+        user_info = get_object_or_404(CustomUser, id=pk)
+        if user_info.id == request.user.id:
+            user_info_path = reverse_lazy('users:user_info')
+            return render(request, 'users/user_info.html', {'user': user_info})
+        return HttpResponseForbidden('Войдите в аккаунт для просмотра данных')
