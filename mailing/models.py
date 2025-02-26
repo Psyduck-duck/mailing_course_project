@@ -61,6 +61,7 @@ class SendAttempt(models.Model):
     server_response = models.TextField(blank=True, verbose_name='Ответ сервера')
     recipient = models.ForeignKey(Recipient, on_delete=models.CASCADE, related_name='send_attempts', verbose_name='Получатель')
     mailing = models.ForeignKey(Mailing, on_delete=models.CASCADE, related_name='send_attempts', verbose_name='Рассылка')
+    owner = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='attempts', verbose_name='владелец')
 
     def __str__(self):
         return f"Attempt: {self.attempt_time} - {self.status}"

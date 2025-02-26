@@ -5,7 +5,10 @@ from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy
 from django.views.generic import DetailView
+
+from mailing.models import SendAttempt
 from .models import CustomUser
+from mailing.services import SendAttemptService
 
 from .forms import CustomUserCreationForm
 from django.views.generic.edit import CreateView
@@ -48,7 +51,11 @@ class UserDetailView(DetailView):
 
     def get(self, request, pk):
         user_info = get_object_or_404(CustomUser, id=pk)
+        user_id = request.user
+        success_attempts_count = SendAttempt.objects.filter(status='Успешно', owner_id=user_id).count()
+        unsuccess_attempts_count = SendAttempt.objects.filter(status='Не успешно', owner_id=user_id).count()
         if user_info.id == request.user.id:
-            user_info_path = reverse_lazy('users:user_info')
-            return render(request, 'users/user_info.html', {'user': user_info})
+            return render(request, 'users/user_info.html',
+                          {'user': user_info, 'success_attempts_count': success_attempts_count,
+                           'unsuccess_attempts_count': unsuccess_attempts_count})
         return HttpResponseForbidden('Войдите в аккаунт для просмотра данных')

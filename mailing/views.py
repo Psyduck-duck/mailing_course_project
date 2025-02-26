@@ -154,7 +154,8 @@ class SendMailingView(generic.View):
                 mailing=mailing,
                 status=status,
                 recipient=recipient,
-                server_response=server_response
+                server_response=server_response,
+                owner=request.user
             )
 
         # Обновление статуса рассылки

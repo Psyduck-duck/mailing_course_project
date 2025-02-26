@@ -18,6 +18,8 @@
                 <li class="list-group-item">Никнейм: {{ user.description }}</li>
                 <li class="list-group-item">Номер телефона: {{ user.phone_number }}</li>
                 <li class="list-group-item">Страна: {{ user.country }}</li>
+                <li class="list-group-item">Успешных попыток отправки сообщения: {{ success_attempts_count }}</li>
+                <li class="list-group-item">Не успешных попыток отправки сообщения: {{ unsuccess_attempts_count }}</li>
             </ul>
         </div>
     </div>
