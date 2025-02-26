@@ -31,7 +31,7 @@ class MailingForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['end_at'].widget.attrs.update({'class': 'form-control'})
+        self.fields['end_at'].widget.attrs.update({'class': 'form-control', 'placeholder': 'YYYY-MM-DD hh:mm:ss'})
         self.fields['message'].widget.attrs.update({'class': 'form-control'})
         self.fields['recipients'].widget.attrs.update({'class': 'form-control'})
 

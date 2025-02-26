@@ -1,5 +1,5 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.views import generic
 from django.urls import reverse_lazy
 from django.core.mail import send_mail
@@ -56,6 +56,14 @@ class MessageCreateView(LoginRequiredMixin, generic.CreateView):
     success_url = reverse_lazy('mailing:message_list')
     login_url = reverse_lazy('users:login')
 
+    def post(self, request):
+        form = MessageForm(request.POST)
+        if form.is_valid():
+            responce = form.save(commit=False)
+            responce.owner = request.user
+            responce.save()
+            return redirect('mailing:message_list')
+
 
 class MessageUpdateView(LoginRequiredMixin, generic.UpdateView):
     model = Message
@@ -87,6 +95,14 @@ class MailingCreateView(LoginRequiredMixin, generic.CreateView):
     template_name = 'mailing/mailing_form.html'
     success_url = reverse_lazy('mailing:mailing_list')
     login_url = reverse_lazy('users:login')
+
+    def post(self, request):
+        form = MailingForm(request.POST)
+        if form.is_valid():
+            responce = form.save(commit=False)
+            responce.owner = request.user
+            responce.save()
+            return redirect('mailing:mailing_list')
 
 
 class MailingUpdateView(LoginRequiredMixin, generic.UpdateView):
