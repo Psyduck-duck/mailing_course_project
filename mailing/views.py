@@ -178,13 +178,15 @@ class HomeView(generic.TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        user_id = self.request.user
-        # context['total_mailings'] = Mailing.objects.count()
-        # context['active_mailings'] = Mailing.objects.filter(status='Запущена').count()
-        # context['unique_recipients'] = Recipient.objects.count()
         context['total_send_message'] = SendAttempt.objects.filter(status='Успешно').count()
-        if self.request.user.has_perm('customuser.can_see_all_users'):
-            context['users_statistic_list'] = CustomUserService.users_statistic_list()
-        else:
-            context['users_statistic_list'] = CustomUserService.users_statistic_list(user_id)
+        if self.request.user.is_authenticated:
+            user_id = self.request.user.id
+            # context['total_mailings'] = Mailing.objects.count()
+            # context['active_mailings'] = Mailing.objects.filter(status='Запущена').count()
+            # context['unique_recipients'] = Recipient.objects.count()
+
+            if self.request.user.has_perm('customuser.can_see_all_users'):
+                context['users_statistic_list'] = CustomUserService.users_statistic_list()
+            else:
+                context['users_statistic_list'] = CustomUserService.users_statistic_list(user_id)
         return context
