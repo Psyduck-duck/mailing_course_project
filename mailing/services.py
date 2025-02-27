@@ -1,18 +1,29 @@
 from .models import Message, Mailing, Recipient, SendAttempt
+from users.models import CustomUser
 
 
-class SendAttemptService:
-
-    @staticmethod
-    def get_success_attempts_count(user_id):
-        """ метод для получения счетчика успешных попыток отправок пользоватяля """
-
-        success_attempts_count = SendAttempt.objects.filter(status='Успешно', owner_id=user_id).count()
-        return success_attempts_count
+class CustomUserService:
 
     @staticmethod
-    def get_unsuccess_attempts_count(user_id):
-        """ метод для получения счетчика неуспешных попыток отправок пользоватяля """
+    def users_statistic_list(user_id=None):
+        """ Метод для получения списка статистик пользователей """
 
-        unsuccess_attempts_count = SendAttempt.objects.filter(status='Не успешно', owner=user_id).count()
-        return unsuccess_attempts_count
+        users_statistic_list = []
+        if not user_id:
+            users_list = CustomUser.objects.all()
+        else:
+            users_list = CustomUser.objects.filter(id=user_id)
+        for user in users_list:
+            user_id = user.id
+            username = user.username
+            user_statistic_dict = {}
+            user_statistic_dict['user_id'] = user_id
+            user_statistic_dict['username'] = username
+            user_statistic_dict['total_mailings'] = Mailing.objects.filter(owner=user_id).count()
+            user_statistic_dict['active_mailings'] = Mailing.objects.filter(status='Запущена', owner=user_id).count()
+            user_statistic_dict['unique_recipients'] = Recipient.objects.filter(owner=user_id).count()
+            user_statistic_dict['total_send_message'] = SendAttempt.objects.filter(status='Успешно', owner=user_id).count()
+
+            users_statistic_list.append(user_statistic_dict)
+
+        return users_statistic_list

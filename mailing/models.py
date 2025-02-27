@@ -6,6 +6,7 @@ class Recipient(models.Model):
     email = models.EmailField(unique=True, verbose_name='Адрес электронной почты')
     full_name = models.CharField(max_length=255, verbose_name='Полное имя')
     comment = models.TextField(blank=True, verbose_name='Комментарий')
+    owner = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='recipients', verbose_name='получатель')
 
     def __str__(self):
         return self.email

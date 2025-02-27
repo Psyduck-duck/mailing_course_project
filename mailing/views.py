@@ -6,7 +6,7 @@ from django.core.mail import send_mail
 from django.utils import timezone
 from .models import Recipient, Message, Mailing, SendAttempt
 from .forms import RecipientForm, MessageForm, MailingForm
-
+from .services import CustomUserService
 
 # CRUD для получателей (Recipient)
 
@@ -178,7 +178,13 @@ class HomeView(generic.TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['total_mailings'] = Mailing.objects.count()
-        context['active_mailings'] = Mailing.objects.filter(status='Запущена').count()
-        context['unique_recipients'] = Recipient.objects.count()
+        user_id = self.request.user
+        # context['total_mailings'] = Mailing.objects.count()
+        # context['active_mailings'] = Mailing.objects.filter(status='Запущена').count()
+        # context['unique_recipients'] = Recipient.objects.count()
+        context['total_send_message'] = SendAttempt.objects.filter(status='Успешно').count()
+        if self.request.user.has_perm('customuser.can_see_all_users'):
+            context['users_statistic_list'] = CustomUserService.users_statistic_list()
+        else:
+            context['users_statistic_list'] = CustomUserService.users_statistic_list(user_id)
         return context

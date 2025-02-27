@@ -8,7 +8,7 @@ from django.views.generic import DetailView
 
 from mailing.models import SendAttempt
 from .models import CustomUser
-from mailing.services import SendAttemptService
+# from mailing.services import CustomUserService
 
 from .forms import CustomUserCreationForm
 from django.views.generic.edit import CreateView

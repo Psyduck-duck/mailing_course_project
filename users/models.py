@@ -14,3 +14,11 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return self.email
+
+    class Meta:
+        verbose_name = 'пользователь'
+        verbose_name_plural = 'пользователи'
+        permissions = [
+            ('can_see_all_users', 'Can see all users')
+        ]
+

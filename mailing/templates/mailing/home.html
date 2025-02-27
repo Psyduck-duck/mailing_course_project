@@ -6,22 +6,30 @@
 <h1>Добро пожаловать в Mailing App</h1>
 <div class="row">
     <div class="container">
+        <h4 class="justify-content-center">Всего писем отправлено: {{ total_send_message }}</h4>
+    </div>
+    {% for user in users_statistic_list %}
+    <h5>Статистика пользователя: {{ user.username }}</h5>
+    <div class="container">
         <table class="table">
             <thead>
             <tr>
                 <th scope="col">Всего рассылок</th>
                 <th scope="col">Активных рассылок</th>
                 <th scope="col">Уникальных получателей</th>
+                <th scope="col">Отправленных писем</th>
             </tr>
             </thead>
             <tbody>
             <tr>
-                <td>{{ total_mailings }}</td>
-                <td>{{ active_mailings }}</td>
-                <td>{{ unique_recipients }}</td>
+                <td>{{ user.total_mailings }}</td>
+                <td>{{ user.active_mailings }}</td>
+                <td>{{ user.unique_recipients }}</td>
+                <td>{{ user.total_send_message }}</td>
             </tr>
             </tbody>
         </table>
     </div>
+    {% endfor %}
 </div>
 {% endblock %}
