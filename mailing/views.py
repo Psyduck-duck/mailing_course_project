@@ -1,5 +1,7 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import render, redirect
+from django.core.exceptions import PermissionDenied
+from django.http import HttpResponseForbidden
+from django.shortcuts import render, redirect, get_object_or_404
 from django.views import generic
 from django.urls import reverse_lazy
 from django.core.mail import send_mail
@@ -10,11 +12,22 @@ from .services import CustomUserService
 
 # CRUD для получателей (Recipient)
 
+
 class RecipientListView(LoginRequiredMixin, generic.ListView):
     model = Recipient
     template_name = 'mailing/recipient_list.html'
     context_object_name = 'recipients'
     login_url = reverse_lazy('users:login')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user_id = self.request.user.id
+
+        if self.request.user.has_perm('mailing.can_see_all_recipients'):
+            context['recipients'] = Recipient.objects.all()
+        else:
+            context['recipients'] = Recipient.objects.filter(owner_id=user_id)
+        return context
 
 
 class RecipientCreateView(LoginRequiredMixin, generic.CreateView):
@@ -24,6 +37,15 @@ class RecipientCreateView(LoginRequiredMixin, generic.CreateView):
     success_url = reverse_lazy('mailing:recipient_list')
     login_url = reverse_lazy('users:login')
 
+    def post(self, request):
+
+        form = RecipientForm(request.POST)
+        if form.is_valid():
+            responce = form.save(commit=False)
+            responce.owner = request.user
+            responce.save()
+            return redirect('mailing:recipient_list')
+
 
 class RecipientUpdateView(LoginRequiredMixin, generic.UpdateView):
     model = Recipient
@@ -32,6 +54,13 @@ class RecipientUpdateView(LoginRequiredMixin, generic.UpdateView):
     success_url = reverse_lazy('mailing:recipient_list')
     login_url = reverse_lazy('users:login')
 
+    def get_form_class(self):
+        user = self.request.user
+        if user.has_perm('mailing.update_recipient') or self.object.owner == user:
+            return RecipientForm
+
+        raise PermissionDenied('У вас нет прав для изменения получателя')
+
 
 class RecipientDeleteView(LoginRequiredMixin, generic.DeleteView):
     model = Recipient
@@ -39,14 +68,32 @@ class RecipientDeleteView(LoginRequiredMixin, generic.DeleteView):
     success_url = reverse_lazy('mailing:recipient_list')
     login_url = reverse_lazy('users:login')
 
+    def post(self, request, pk):
+
+        recipient = get_object_or_404(Recipient, id=pk)
+        if request.user.has_perm('mailing.delete_recipient') or recipient.owner == request.user:
+            recipient.delete()
+            return redirect('mailing:recipient_list')
+        return HttpResponseForbidden('У вас нет прав для удаления получателя')
 
 # CRUD для сообщений (Message)
+
 
 class MessageListView(LoginRequiredMixin, generic.ListView):
     model = Message
     template_name = 'mailing/message_list.html'
     context_object_name = 'messages'
     login_url = reverse_lazy('users:login')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user_id = self.request.user.id
+
+        if self.request.user.has_perm('mailing.can_see_all_recipients'):
+            context['messages'] = Message.objects.all()
+        else:
+            context['messages'] = Message.objects.filter(owner_id=user_id)
+        return context
 
 
 class MessageCreateView(LoginRequiredMixin, generic.CreateView):
@@ -72,12 +119,27 @@ class MessageUpdateView(LoginRequiredMixin, generic.UpdateView):
     success_url = reverse_lazy('mailing:message_list')
     login_url = reverse_lazy('users:login')
 
+    def get_form_class(self):
+        user = self.request.user
+        if user.has_perm('mailing.update_message') or self.object.owner == user:
+            return MessageForm
+
+        raise PermissionDenied('У вас нет прав для изменения сообщения')
+
 
 class MessageDeleteView(LoginRequiredMixin, generic.DeleteView):
     model = Message
     template_name = 'mailing/message_confirm_delete.html'
     success_url = reverse_lazy('mailing:message_list')
     login_url = reverse_lazy('users:login')
+
+    def post(self, request, pk):
+
+        message = get_object_or_404(Message, id=pk)
+        if request.user.has_perm('mailing.delete_message') or message.owner == request.user:
+            message.delete()
+            return redirect('mailing:message_list')
+        return HttpResponseForbidden('У вас нет прав для удаления сообщения')
 
 
 # CRUD для рассылок (Mailing)
@@ -87,6 +149,16 @@ class MailingListView(LoginRequiredMixin, generic.ListView):
     template_name = 'mailing/mailing_list.html'
     context_object_name = 'mailings'
     login_url = reverse_lazy('users:login')
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user_id = self.request.user.id
+
+        if self.request.user.has_perm('mailing.can_see_all_recipients'):
+            context['mailings'] = Mailing.objects.all()
+        else:
+            context['mailings'] = Mailing.objects.filter(owner_id=user_id)
+        return context
 
 
 class MailingCreateView(LoginRequiredMixin, generic.CreateView):
@@ -112,12 +184,27 @@ class MailingUpdateView(LoginRequiredMixin, generic.UpdateView):
     success_url = reverse_lazy('mailing:mailing_list')
     login_url = reverse_lazy('users:login')
 
+    def get_form_class(self):
+        user = self.request.user
+        if user.has_perm('mailing.update_mailing') or self.object.owner == user:
+            return RecipientForm
+
+        raise PermissionDenied('У вас нет прав для изменения рассылки')
+
 
 class MailingDeleteView(LoginRequiredMixin, generic.DeleteView):
     model = Mailing
     template_name = 'mailing/mailing_confirm_delete.html'
     success_url = reverse_lazy('mailing:mailing_list')
     login_url = reverse_lazy('users:login')
+
+    def post(self, request, pk):
+
+        mailing = get_object_or_404(Mailing, id=pk)
+        if request.user.has_perm('mailing.delete_mailing') or mailing.owner == request.user:
+            mailing.delete()
+            return redirect('mailing:mailing_list')
+        return HttpResponseForbidden('У вас нет прав для удаления рассылки')
 
 
 class MailingStatusView(LoginRequiredMixin, generic.DetailView):

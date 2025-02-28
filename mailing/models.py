@@ -14,6 +14,9 @@ class Recipient(models.Model):
     class Meta:
         verbose_name = 'Получатель'
         verbose_name_plural = 'Получатели'
+        permissions = [
+            ('can_see_all_recipients', 'Can see all recipients')
+        ]
 
 
 class Message(models.Model):
@@ -27,6 +30,9 @@ class Message(models.Model):
     class Meta:
         verbose_name = 'Сообщение'
         verbose_name_plural = 'Сообщения'
+        permissions = [
+            ('can_see_all_messages', 'Can see all messages')
+        ]
 
 
 class Mailing(models.Model):
@@ -49,6 +55,9 @@ class Mailing(models.Model):
     class Meta:
         verbose_name = 'Рассылка'
         verbose_name_plural = 'Рассылки'
+        permissions = [
+            ('can_see_all_mailing', 'Can see all mailing')
+        ]
 
 
 class SendAttempt(models.Model):
