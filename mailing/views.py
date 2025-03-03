@@ -229,6 +229,12 @@ class MailingStatusView(LoginRequiredMixin, generic.DetailView):
     template_name = 'mailing/mailing_status.html'
     login_url = reverse_lazy('users:login')
 
+    def get(self, request, pk):
+        mailing = get_object_or_404(Mailing, id=pk)
+        if request.user.has_perm('mailing.view_mailing') or mailing.owner == request.user:
+            return super().get(request, pk)
+        return HttpResponseForbidden('У вас нет прав для просмотра деталей рассылки')
+
 
 # Генерация отчета и отправка рассылки
 
