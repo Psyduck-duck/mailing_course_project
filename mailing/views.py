@@ -1,6 +1,6 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
-from django.http import HttpResponseForbidden
+from django.http import HttpResponseForbidden, HttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.views import generic
 from django.urls import reverse_lazy
@@ -68,6 +68,12 @@ class RecipientDeleteView(LoginRequiredMixin, generic.DeleteView):
     success_url = reverse_lazy('mailing:recipient_list')
     login_url = reverse_lazy('users:login')
 
+    def get(self, request, pk):
+        recipient = get_object_or_404(Recipient, id=pk)
+        if request.user.has_perm('mailing.delete_message') or recipient.owner == request.user:
+            return super().get(request, pk)
+        return HttpResponseForbidden('У вас нет прав для удаления получателя')
+
     def post(self, request, pk):
 
         recipient = get_object_or_404(Recipient, id=pk)
@@ -133,6 +139,12 @@ class MessageDeleteView(LoginRequiredMixin, generic.DeleteView):
     success_url = reverse_lazy('mailing:message_list')
     login_url = reverse_lazy('users:login')
 
+    def get(self, request, pk):
+        message = get_object_or_404(Message, id=pk)
+        if request.user.has_perm('mailing.delete_message') or message.owner == request.user:
+            return super().get(request, pk)
+        return HttpResponseForbidden('У вас нет прав для удаления сообщения')
+
     def post(self, request, pk):
 
         message = get_object_or_404(Message, id=pk)
@@ -168,13 +180,12 @@ class MailingCreateView(LoginRequiredMixin, generic.CreateView):
     success_url = reverse_lazy('mailing:mailing_list')
     login_url = reverse_lazy('users:login')
 
-    def post(self, request):
-        form = MailingForm(request.POST)
-        if form.is_valid():
-            responce = form.save(commit=False)
-            responce.owner = request.user
-            responce.save()
-            return redirect('mailing:mailing_list')
+    def form_valid(self, form):
+        mailing = form.save(commit=False)
+        user = self.request.user
+        mailing.owner = user
+        mailing.save()
+        return super().form_valid(form)
 
 
 class MailingUpdateView(LoginRequiredMixin, generic.UpdateView):
@@ -187,7 +198,7 @@ class MailingUpdateView(LoginRequiredMixin, generic.UpdateView):
     def get_form_class(self):
         user = self.request.user
         if user.has_perm('mailing.update_mailing') or self.object.owner == user:
-            return RecipientForm
+            return MailingForm
 
         raise PermissionDenied('У вас нет прав для изменения рассылки')
 
@@ -197,6 +208,12 @@ class MailingDeleteView(LoginRequiredMixin, generic.DeleteView):
     template_name = 'mailing/mailing_confirm_delete.html'
     success_url = reverse_lazy('mailing:mailing_list')
     login_url = reverse_lazy('users:login')
+
+    def get(self, request, pk):
+        mailing = get_object_or_404(Mailing, id=pk)
+        if request.user.has_perm('mailing.delete_mailing') or mailing.owner == request.user:
+            return super().get(request, pk)
+        return HttpResponseForbidden('У вас нет прав для удаления рассылки')
 
     def post(self, request, pk):
 
