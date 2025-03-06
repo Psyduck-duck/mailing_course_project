@@ -10,6 +10,17 @@
     </div>
     {% for user in users_statistic_list %}
     <h5>Статистика пользователя: {{ user.username }}</h5>
+    {% if perms.users.can_block_user %}
+    {% if not user.user_is_blocked %}
+    <div class="container">
+        <a class="btn btn-danger" href="{% url 'users:block_user' user.user_id %}">Заблокировать пользователя</a>
+    </div>
+    {% else %}
+    <div class="container">
+        <a class="btn btn-success" href="{% url 'users:block_user' user.user_id %}">Разблокировать пользователя</a>
+    </div>
+    {% endif %}
+    {% endif %}
     <div class="container">
         <table class="table">
             <thead>

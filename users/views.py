@@ -1,11 +1,14 @@
 import secrets
 
 from django.contrib.auth import login
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, LogoutView
+from django.core.exceptions import PermissionDenied
 from django.core.mail import send_mail
 from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy, reverse
+from django.views import View
 from django.views.generic import DetailView
 
 from config.settings import EMAIL_HOST_USER
@@ -13,8 +16,8 @@ from mailing.models import SendAttempt
 from .models import CustomUser
 # from mailing.services import CustomUserService
 
-from .forms import CustomUserCreationForm
-from django.views.generic.edit import CreateView
+from .forms import CustomUserCreationForm, UserUpdateForm
+from django.views.generic.edit import CreateView, UpdateView
 from dotenv import load_dotenv
 import os
 from users.models import CustomUser as User
@@ -50,13 +53,6 @@ class RegisterView(CreateView):
         )
         return super().form_valid(form)
 
-    @staticmethod
-    def send_welcome_email(user_email):
-        subject = 'Добро пожаловать в наш сервис'
-        message = 'Спасибо, что зарегистрировались в нашем сервисе!'
-        from_email = os.getenv('EMAIL_HOST_USER')
-        recipient_list = [user_email]
-        send_mail(subject, message, from_email, recipient_list)
 
 def email_verification(request, token):
     user = get_object_or_404(User, token=token)
@@ -66,7 +62,7 @@ def email_verification(request, token):
 
 
 class UserDetailView(DetailView):
-    model = CustomUser
+    model = User
     template_name = 'users/user_info.html'
     context_object_name = 'user'
 
@@ -80,3 +76,46 @@ class UserDetailView(DetailView):
                           {'user': user_info, 'success_attempts_count': success_attempts_count,
                            'unsuccess_attempts_count': unsuccess_attempts_count})
         return HttpResponseForbidden('Войдите в аккаунт для просмотра данных')
+
+
+class UserUpdateView(LoginRequiredMixin, UpdateView):
+    model = User
+    form_class = UserUpdateForm
+    template_name = 'users/user_form.html'
+
+    def get_form_class(self):
+        return UserUpdateForm
+
+    def form_valid(self, form):
+        self.object = form.save()
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return reverse_lazy("users:user_info", kwargs={'pk': self.object.id})
+
+
+class BlockUserView(LoginRequiredMixin, View):
+    model = User
+    template_name = 'users/user_block_confirm.html'
+    success_url = reverse_lazy('mailing:home')
+    login_url = reverse_lazy('users:login')
+    context_object_name = 'user'
+
+    def get(self, request, pk):
+        user = get_object_or_404(CustomUser, id=pk)
+        if not request.user.has_perm('custom_users.can_block_user'):
+            return HttpResponseForbidden('У вас нет прав для блокировки / разблокировки пользователя')
+        return render(request, 'users/user_block_confirm.html', {'user': user})
+
+    def post(self, request, pk):
+        user = get_object_or_404(CustomUser, id=pk)
+        if not request.user.has_perm('custom_users.can_block_user'):
+            return HttpResponseForbidden('У вас нет прав для блокировки / разблокировки пользователя')
+        if user.is_blocked == False:
+            user.is_blocked = True
+            user.is_active = False
+        else:
+            user.is_blocked = False
+            user.is_active = True
+        user.save()
+        return redirect('mailing:home')

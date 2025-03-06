@@ -16,9 +16,11 @@ class CustomUserService:
         for user in users_list:
             user_id = user.id
             username = user.username
+            user_is_blocked = user.is_blocked
             user_statistic_dict = {}
             user_statistic_dict['user_id'] = user_id
             user_statistic_dict['username'] = username
+            user_statistic_dict['user_is_blocked'] = user_is_blocked
             user_statistic_dict['total_mailings'] = Mailing.objects.filter(owner=user_id).count()
             user_statistic_dict['active_mailings'] = Mailing.objects.filter(status='Запущена', owner=user_id).count()
             user_statistic_dict['unique_recipients'] = Recipient.objects.filter(owner=user_id).count()

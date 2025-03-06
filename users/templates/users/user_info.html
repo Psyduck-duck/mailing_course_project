@@ -21,6 +21,8 @@
                 <li class="list-group-item">Успешных попыток отправки сообщения: {{ success_attempts_count }}</li>
                 <li class="list-group-item">Не успешных попыток отправки сообщения: {{ unsuccess_attempts_count }}</li>
             </ul>
+            <a href="{% url 'users:user_update' user.pk %}" class="btn btn-primary mt-3">Редактировать профиль</a>
+
         </div>
     </div>
 </div>
