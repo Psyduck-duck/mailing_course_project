@@ -16,7 +16,7 @@ class MailingAdmin(admin.ModelAdmin):
 
 @admin.register(Recipient)
 class RecipientAdmin(admin.ModelAdmin):
-    list_display = ('email', 'full_name', 'comment')
+    list_display = ('email', 'full_name', 'comment', 'owner')
     search_fields = ('email', 'full_name')
 
 
