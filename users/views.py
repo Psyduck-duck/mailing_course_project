@@ -1,11 +1,14 @@
+import secrets
+
 from django.contrib.auth import login
 from django.contrib.auth.views import LoginView, LogoutView
 from django.core.mail import send_mail
 from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 from django.views.generic import DetailView
 
+from config.settings import EMAIL_HOST_USER
 from mailing.models import SendAttempt
 from .models import CustomUser
 # from mailing.services import CustomUserService
@@ -14,6 +17,7 @@ from .forms import CustomUserCreationForm
 from django.views.generic.edit import CreateView
 from dotenv import load_dotenv
 import os
+from users.models import CustomUser as User
 
 
 class CustomLoginView(LoginView):
@@ -31,8 +35,19 @@ class RegisterView(CreateView):
 
     def form_valid(self, form):
         user = form.save()
-        login(self.request, user)
-        # self.send_welcome_email(user.email)
+        user.is_active = False
+        user.token = secrets.token_hex(16)
+        user.save()
+        host = self.request.get_host()
+        url = f"http://{host}/users/email-confirm/{user.token}/"
+        send_mail(
+            subject="Подтверждение почты",
+            message=f"Перейдите по ссылке, чтобы подтвердить почту: {url}",
+            from_email=EMAIL_HOST_USER,
+            recipient_list=[
+                user.email,
+            ],
+        )
         return super().form_valid(form)
 
     @staticmethod
@@ -42,6 +57,12 @@ class RegisterView(CreateView):
         from_email = os.getenv('EMAIL_HOST_USER')
         recipient_list = [user_email]
         send_mail(subject, message, from_email, recipient_list)
+
+def email_verification(request, token):
+    user = get_object_or_404(User, token=token)
+    user.is_active = True
+    user.save()
+    return redirect(reverse("users:login"))
 
 
 class UserDetailView(DetailView):
