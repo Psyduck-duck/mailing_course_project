@@ -39,7 +39,8 @@ class Mailing(models.Model):
     STATUS_CHOICES = [
         ('Создана', 'Создана'),
         ('Запущена', 'Запущена'),
-        ('Завершена', 'Завершена')
+        ('Завершена', 'Завершена'),
+        ('Отключена', 'Отключена')
     ]
 
     first_sent_at = models.DateTimeField(null=True, blank=True, verbose_name='Дата начала отправки')
@@ -56,7 +57,8 @@ class Mailing(models.Model):
         verbose_name = 'Рассылка'
         verbose_name_plural = 'Рассылки'
         permissions = [
-            ('can_see_all_mailing', 'Can see all mailing')
+            ('can_see_all_mailing', 'Can see all mailing'),
+            ('can_turn_off_mailing', 'Can turn off mailing'),
         ]
 
 

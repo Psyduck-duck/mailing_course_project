@@ -6,6 +6,8 @@ from django.views import generic
 from django.urls import reverse_lazy
 from django.core.mail import send_mail
 from django.utils import timezone
+
+from config.settings import EMAIL_HOST_USER
 from .models import Recipient, Message, Mailing, SendAttempt
 from .forms import RecipientForm, MessageForm, MailingForm
 from .services import CustomUserService
@@ -249,7 +251,7 @@ class SendMailingView(generic.View):
                 send_mail(
                     mailing.message.subject,
                     mailing.message.body,
-                    'from@example.com',  # email from
+                    EMAIL_HOST_USER,
                     [recipient.email],
                     fail_silently=False,
                 )
@@ -300,3 +302,25 @@ class HomeView(generic.TemplateView):
             else:
                 context['users_statistic_list'] = CustomUserService.users_statistic_list(user_id)
         return context
+
+
+class OffMailingView(LoginRequiredMixin, generic.View):
+    model = Mailing
+    template_name = 'mailing/mailing_off_confirm.html'
+    success_url = reverse_lazy('mailing:mailing_list')
+    login_url = reverse_lazy('users:login')
+    context_object_name = 'mailing'
+
+    def get(self, request, pk):
+        mailing = get_object_or_404(Mailing, id=pk)
+        if not request.user.has_perm('mailing.can_turn_off_mailing'):
+            return HttpResponseForbidden('У вас нет прав для выключения рассылки')
+        return render(request, 'mailing/mailing_off_confirm.html', {'mailing': mailing})
+
+    def post(self, request, pk):
+        mailing = get_object_or_404(Mailing, id=pk)
+        if not request.user.has_perm('mailing.can_turn_off_mailing'):
+            return HttpResponseForbidden('У вас нет прав для выключения рассылки')
+        mailing.status = 'Отключена'
+        mailing.save()
+        return redirect('mailing:mailing_list')
