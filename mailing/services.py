@@ -1,4 +1,4 @@
-from .models import Message, Mailing, Recipient, SendAttempt
+from .models import Mailing, Recipient, SendAttempt
 from users.models import CustomUser
 
 

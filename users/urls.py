@@ -5,7 +5,6 @@ from django.contrib.auth.views import (PasswordResetCompleteView,
 from django.urls import path, reverse_lazy
 from . import views
 
-from users.apps import UsersConfig
 # from users.views import (UserCreateView, UserListView, UserUpdateView,
 #                          email_verification, view_profile)
 

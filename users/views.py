@@ -1,9 +1,7 @@
 import secrets
 
-from django.contrib.auth import login
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.views import LoginView, LogoutView
-from django.core.exceptions import PermissionDenied
 from django.core.mail import send_mail
 from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
@@ -20,8 +18,6 @@ from .models import CustomUser
 
 from .forms import CustomUserCreationForm, UserUpdateForm
 from django.views.generic.edit import CreateView, UpdateView
-from dotenv import load_dotenv
-import os
 from users.models import CustomUser as User
 
 
@@ -107,7 +103,7 @@ class BlockUserView(LoginRequiredMixin, View):
         user = get_object_or_404(CustomUser, id=pk)
         if not request.user.has_perm('users.can_block_user'):
             return HttpResponseForbidden('У вас нет прав для блокировки / разблокировки пользователя')
-        if user.is_blocked == False:
+        if not user.is_blocked:
             user.is_blocked = True
             user.is_active = False
         else:
