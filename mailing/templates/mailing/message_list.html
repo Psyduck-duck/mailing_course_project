@@ -19,8 +19,10 @@
             <td>{{ message.subject }}</td>
             <td>{{ message.body }}</td>
             <td>
+                {% if user == message.owner %}
                 <a href="{% url 'mailing:message_update' message.pk %}" class="btn btn-warning">Редактировать</a>
                 <a href="{% url 'mailing:message_delete' message.pk %}" class="btn btn-danger">Удалить</a>
+                {% endif %}
             </td>
         </tr>
         {% endfor %}

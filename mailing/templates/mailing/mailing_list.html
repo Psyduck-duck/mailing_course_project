@@ -19,10 +19,15 @@
             <td>{{ mailing.message.subject }}</td>
             <td>{{ mailing.status }}</td>
             <td>
+                {% if user == mailing.owner %}
                 <a href="{% url 'mailing:mailing_update' mailing.pk %}" class="btn btn-warning">Редактировать</a>
                 <a href="{% url 'mailing:send_mailing' mailing.pk %}" class="btn btn-info">Отправить</a>
                 <a href="{% url 'mailing:mailing_status' mailing.pk %}" class="btn btn-info">Подробнее</a>
                 <a href="{% url 'mailing:mailing_delete' mailing.pk %}" class="btn btn-danger">Удалить</a>
+                {% endif %}
+                {% if perms.mailing.can_turn_off_mailing %}
+                <a href="{% url 'mailing:mailing_off' mailing.pk %}" class="btn btn-danger">Отключить рассылку</a>
+                {% endif %}
             </td>
         </tr>
         {% endfor %}

@@ -8,7 +8,9 @@ from django.core.mail import send_mail
 from django.http import HttpResponseForbidden
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse_lazy, reverse
+from django.utils.decorators import method_decorator
 from django.views import View
+from django.views.decorators.cache import cache_page
 from django.views.generic import DetailView
 
 from config.settings import EMAIL_HOST_USER
@@ -61,6 +63,7 @@ def email_verification(request, token):
     return redirect(reverse("users:login"))
 
 
+@method_decorator(cache_page(60*5), name='dispatch')
 class UserDetailView(DetailView):
     model = User
     template_name = 'users/user_info.html'
@@ -83,13 +86,6 @@ class UserUpdateView(LoginRequiredMixin, UpdateView):
     form_class = UserUpdateForm
     template_name = 'users/user_form.html'
 
-    def get_form_class(self):
-        return UserUpdateForm
-
-    def form_valid(self, form):
-        self.object = form.save()
-        return super().form_valid(form)
-
     def get_success_url(self):
         return reverse_lazy("users:user_info", kwargs={'pk': self.object.id})
 
@@ -103,13 +99,13 @@ class BlockUserView(LoginRequiredMixin, View):
 
     def get(self, request, pk):
         user = get_object_or_404(CustomUser, id=pk)
-        if not request.user.has_perm('custom_users.can_block_user'):
+        if not request.user.has_perm('users.can_block_user'):
             return HttpResponseForbidden('У вас нет прав для блокировки / разблокировки пользователя')
         return render(request, 'users/user_block_confirm.html', {'user': user})
 
     def post(self, request, pk):
         user = get_object_or_404(CustomUser, id=pk)
-        if not request.user.has_perm('custom_users.can_block_user'):
+        if not request.user.has_perm('users.can_block_user'):
             return HttpResponseForbidden('У вас нет прав для блокировки / разблокировки пользователя')
         if user.is_blocked == False:
             user.is_blocked = True

@@ -21,15 +21,13 @@ class RecipientListView(LoginRequiredMixin, generic.ListView):
     context_object_name = 'recipients'
     login_url = reverse_lazy('users:login')
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+    def get_queryset(self):
         user_id = self.request.user.id
-
         if self.request.user.has_perm('mailing.can_see_all_recipients'):
-            context['recipients'] = Recipient.objects.all()
+            queryset = Recipient.objects.all()
         else:
-            context['recipients'] = Recipient.objects.filter(owner_id=user_id)
-        return context
+            queryset = Recipient.objects.filter(owner_id=user_id)
+        return queryset
 
 
 class RecipientCreateView(LoginRequiredMixin, generic.CreateView):
@@ -39,14 +37,12 @@ class RecipientCreateView(LoginRequiredMixin, generic.CreateView):
     success_url = reverse_lazy('mailing:recipient_list')
     login_url = reverse_lazy('users:login')
 
-    def post(self, request):
-
-        form = RecipientForm(request.POST)
-        if form.is_valid():
-            responce = form.save(commit=False)
-            responce.owner = request.user
-            responce.save()
-            return redirect('mailing:recipient_list')
+    def form_valid(self, form):
+        recipient = form.save(commit=False)
+        user = self.request.user
+        recipient.owner = user
+        recipient.save()
+        return super().form_valid(form)
 
 
 class RecipientUpdateView(LoginRequiredMixin, generic.UpdateView):
@@ -93,15 +89,13 @@ class MessageListView(LoginRequiredMixin, generic.ListView):
     context_object_name = 'messages'
     login_url = reverse_lazy('users:login')
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+    def get_queryset(self):
         user_id = self.request.user.id
-
-        if self.request.user.has_perm('mailing.can_see_all_recipients'):
-            context['messages'] = Message.objects.all()
+        if self.request.user.has_perm('mailing.can_see_all_messages'):
+            queryset = Message.objects.all()
         else:
-            context['messages'] = Message.objects.filter(owner_id=user_id)
-        return context
+            queryset = Message.objects.filter(owner_id=user_id)
+        return queryset
 
 
 class MessageCreateView(LoginRequiredMixin, generic.CreateView):
@@ -111,13 +105,12 @@ class MessageCreateView(LoginRequiredMixin, generic.CreateView):
     success_url = reverse_lazy('mailing:message_list')
     login_url = reverse_lazy('users:login')
 
-    def post(self, request):
-        form = MessageForm(request.POST)
-        if form.is_valid():
-            responce = form.save(commit=False)
-            responce.owner = request.user
-            responce.save()
-            return redirect('mailing:message_list')
+    def form_valid(self, form):
+        message = form.save(commit=False)
+        user = self.request.user
+        message.owner = user
+        message.save()
+        return super().form_valid(form)
 
 
 class MessageUpdateView(LoginRequiredMixin, generic.UpdateView):
@@ -164,15 +157,13 @@ class MailingListView(LoginRequiredMixin, generic.ListView):
     context_object_name = 'mailings'
     login_url = reverse_lazy('users:login')
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+    def get_queryset(self):
         user_id = self.request.user.id
-
-        if self.request.user.has_perm('mailing.can_see_all_recipients'):
-            context['mailings'] = Mailing.objects.all()
+        if self.request.user.has_perm('mailing.can_see_all_mailing'):
+            queryset = Mailing.objects.all()
         else:
-            context['mailings'] = Mailing.objects.filter(owner_id=user_id)
-        return context
+            queryset = Mailing.objects.filter(owner_id=user_id)
+        return queryset
 
 
 class MailingCreateView(LoginRequiredMixin, generic.CreateView):
@@ -293,11 +284,8 @@ class HomeView(generic.TemplateView):
         context['total_send_message'] = SendAttempt.objects.filter(status='Успешно').count()
         if self.request.user.is_authenticated:
             user_id = self.request.user.id
-            # context['total_mailings'] = Mailing.objects.count()
-            # context['active_mailings'] = Mailing.objects.filter(status='Запущена').count()
-            # context['unique_recipients'] = Recipient.objects.count()
 
-            if self.request.user.has_perm('customuser.can_see_all_users'):
+            if self.request.user.has_perm('users.can_see_all_users'):
                 context['users_statistic_list'] = CustomUserService.users_statistic_list()
             else:
                 context['users_statistic_list'] = CustomUserService.users_statistic_list(user_id)
