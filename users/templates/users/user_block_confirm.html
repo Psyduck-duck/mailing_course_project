@@ -1,0 +1,27 @@
+{% extends 'mailing/base.html' %}
+
+{% block title %}Форма блокировки{% endblock %}
+
+{% block content %}
+
+<div class='container'>
+    <h1>{% if user.is_blocked %}Разблокировать{% else %}Заблокировать{% endif %}</h1>
+    {% if user.is_blocked %}
+    <p>Вы уверены, что хотите разблокировать пользователя {{ user }}?</p>
+    {% else %}
+    <p>Вы уверены, что хотите заблокировать пользователя {{ user }}?</p>
+    {% endif %}
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        {% if user.is_blocked %}
+        <button type="submit" class="btn btn-primary">Разблокировать</button>
+        {% else %}
+        <button type="submit" class="btn btn-danger">Заблокировать</button>
+        {% endif %}
+        <a href="{% url 'mailing:home' %}" class="btn btn-secondary">Отмена</a>
+    </form>
+
+</div>
+
+{% endblock %}
